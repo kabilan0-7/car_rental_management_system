@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Book a Car | DriveEase{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container"><span class="eyebrow">RESERVATION</span><h1>Let’s get you <em>moving.</em></h1><p>Complete the form below to create your rental request.</p></div></section>
+<section class="section container booking-layout">
+  <div class="booking-main">
+    <form method="post" action="{{ url_for('booking') }}" class="form-card" id="bookingForm">
+      <div class="form-section"><span class="form-step">01</span><div><h2>Your details</h2><p>Who will be driving?</p></div></div>
+      <div class="form-grid">
+        <label class="field full">Full name <span>*</span><input type="text" name="full_name" placeholder="Enter your full name" required maxlength="80" pattern="[A-Za-z .'-]{2,80}" title="Use 2–80 letters and common name punctuation." autocomplete="name"></label>
+        <label class="field">Email address <span>*</span><input type="email" name="email" placeholder="you@example.com" required maxlength="120" autocomplete="email"></label>
+        <label class="field">Mobile number <span>*</span><input type="tel" name="phone" placeholder="10-digit mobile number" required pattern="[0-9]{10}" maxlength="10" minlength="10" title="Enter 10 digits, without country code." autocomplete="tel"></label>
+        <label class="field">Driver age <span>*</span><input type="number" name="driver_age" min="18" max="100" value="20" required></label>
+        <label class="field">Driving licence number <span>*</span><input type="text" name="license_number" placeholder="Enter licence number" required maxlength="30" pattern="[A-Za-z0-9 -]{5,30}"></label>
+      </div>
+      <div class="form-divider"></div>
+      <div class="form-section"><span class="form-step">02</span><div><h2>Your journey</h2><p>Choose your car and rental dates.</p></div></div>
+      <div class="form-grid">
+        <label class="field full">Choose a car <span>*</span><select name="car_id" id="carSelect" required><option value="">Select a vehicle</option>{% for car in cars %}<option value="{{ car.id }}" data-price="{{ car.price }}" {% if selected_car == car.id %}selected{% endif %}>{{ car.name }} — ₹{{ "{:,}".format(car.price) }}/day</option>{% endfor %}</select></label>
+        <label class="field">Pickup location <span>*</span><input type="text" name="pickup_location" placeholder="e.g. Coimbatore Airport" required maxlength="100"></label>
+        <label class="field">Drop-off location <span>*</span><input type="text" name="drop_location" placeholder="e.g. Gandhipuram" required maxlength="100"></label>
+        <label class="field">Pickup date <span>*</span><input type="date" name="pickup_date" id="pickupDate" min="{{ today }}" required></label>
+        <label class="field">Pickup time <span>*</span><input type="time" name="pickup_time" value="10:00" required></label>
+        <label class="field">Return date <span>*</span><input type="date" name="return_date" id="returnDate" min="{{ today }}" required></label>
+        <label class="field">Return time <span>*</span><input type="time" name="return_time" value="10:00" required></label>
+      </div>
+      <div class="form-divider"></div>
+      <div class="form-section"><span class="form-step">03</span><div><h2>Preferences</h2><p>Optional extras for your trip.</p></div></div>
+      <fieldset class="choice-group"><legend>Payment preference <span>*</span></legend><label class="choice"><input type="radio" name="payment_method" value="UPI" required checked> UPI</label><label class="choice"><input type="radio" name="payment_method" value="Card"> Debit / credit card</label><label class="choice"><input type="radio" name="payment_method" value="At pickup"> Pay at pickup</label></fieldset>
+      <fieldset class="choice-group"><legend>Optional extras</legend><label class="choice"><input type="checkbox" name="extras" value="child-seat"> Child seat (+₹500 flat)</label><label class="choice"><input type="checkbox" name="extras" value="wifi"> Wi-Fi device (+₹300 flat)</label></fieldset>
+      <div class="form-grid">
+        <label class="field full">Trip notes <textarea name="notes" rows="3" maxlength="500" placeholder="Anything we should know? (optional)"></textarea></label>
+        <label class="field">How did you hear about us? <select name="referral"><option>Friend or family</option><option>Social media</option><option>Search engine</option><option>Other</option></select></label>
+        <label class="field">Preferred contact time <input type="time" name="contact_time" value="17:00"></label>
+        <label class="field">Rate this booking experience <input type="range" name="experience_rating" min="1" max="5" value="4"></label>
+        <label class="field">Choose a favourite accent <input type="color" name="accent_color" value="#ff6b35"></label>
+        <label class="field">Portfolio / profile URL (optional) <input type="url" name="profile_url" placeholder="https://example.com"></label>
+        <label class="field">Booking month (optional) <input type="month" name="booking_month"></label>
+        <label class="field">Search reference (optional) <input type="search" name="reference_search" placeholder="Reference keyword" maxlength="40"></label>
+        <label class="field">Request ID <input type="text" value="Generated after submission" readonly></label>
+        <label class="field">Promo code <input type="text" value="WELCOME" disabled></label>
+      </div>
+      <label class="terms-check"><input type="checkbox" name="terms" required> I confirm that the details are correct and accept the demo rental terms. <span>*</span></label>
+      <input type="hidden" name="form_version" value="1.0">
+      <button class="btn btn-primary btn-wide" type="submit">Confirm rental request <span>↗</span></button>
+      <p class="form-footnote" style="font-size:12px;color:#777;margin-top:12px;">Demo project: submitting this form saves a reservation locally; it does not charge a payment method.</p>
+    </form>
+  </div>
+  <aside class="booking-aside"><div class="aside-card"><span class="eyebrow">YOUR BOOKING</span><h3>Plan it. Book it. <em>Drive it.</em></h3><p>Estimated cost is calculated using the selected vehicle’s daily rate and rental dates.</p><div class="estimate-row"><span>Daily rate</span><strong id="dailyRate">Choose a car</strong></div><div class="estimate-row"><span>Rental days</span><strong id="rentalDays">—</strong></div><div class="estimate-row total"><span>Estimated total</span><strong id="estimateTotal">—</strong></div><small>Extras may add a flat fee. Final costs can differ in a real rental service.</small></div><div class="help-card"><span class="help-icon">?</span><div><h4>Need help?</h4><p>Contact our demo support team if you have questions.</p><a href="{{ url_for('contact') }}">Contact us ↗</a></div></div></aside>
+</section>
+{% endblock %}
